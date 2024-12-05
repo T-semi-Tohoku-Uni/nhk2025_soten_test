@@ -75,17 +75,17 @@ uint8_t TxData_motor[8] = {};
 uint8_t RxData_motor[8] = {};
 
 motor robomas[8] = {
-		{0x201, 1, 0, 0, 0},
-		{0x202, 2, 0, 0, 0},
-		{0x203, 3, 0, 0, 0},
-		{0x204, 4, 0, 0, 0},
-		{0x205, 5, 0, 0, 0},
-		{0x206, 6, 0, 0, 0},
-		{0x207, 7, 0, 0, 0},
-		{0x208, 8, 0, 0, 0},
+		{0x201, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0x202, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0x203, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0x204, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0x205, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0x206, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0x207, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0x208, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 
-volatile float k_p = 7, k_i = 0.5, k_d = 0.0001;
+volatile float k_p = 6, k_i = 0.5, k_d = 0.0001;
 
 volatile uint8_t is_Right = 0, is_Left = 0, is_Up = 0, is_Down = 0, is_Circle = 0, is_Square = 0, is_Triangle = 0;
 volatile uint8_t is_Cross = 0, is_UpRight = 0, is_DownRight = 0, is_UpLeft = 0, is_DownLeft = 0, is_R1 = 0, is_L1 = 0;
@@ -159,7 +159,14 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
 			else {
 				is_Down = false;
 			}
+			if ((RxData[6] & 0x4) == 0x4){
+				is_Circle = true;
+			}
+			else {
+				is_Circle = false;
+			}
 		}
+
 		if (0x301 == RxHeader.Identifier) {
 			if ((int8_t)RxData[1] == 1) {
 				is_Right = false;
@@ -330,6 +337,7 @@ int main(void)
   printf("can_motor_start\r\n");
   FDCAN_RxTxSettings();//Initialize fdcan1
   printf("can start\r\n");
+  HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -338,6 +346,7 @@ int main(void)
   {
 	  if (true == is_Circle) {
 		  robomas[0].trgVel = 36 * 60;
+		  printf("ok\r\n");
 	  }
 	  else {
 		  robomas[0].trgVel = 0;
@@ -346,6 +355,7 @@ int main(void)
 		  printf("addmassage is error\r\n");
 		  Error_Handler();
 	  }
+
 	  HAL_Delay(10);
 
     /* USER CODE END WHILE */
